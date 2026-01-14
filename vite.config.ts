@@ -9,3 +9,4 @@ export default defineConfig({
     'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || '')
   }
 });
+// force rebuild Wed, Jan 14, 2026 10:13:00 PM
