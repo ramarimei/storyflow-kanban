@@ -10,18 +10,58 @@ import EditStoryModal from './components/EditStoryModal';
 import { parseStoriesFromText, generateStandupSummary, generateMeetingScript } from './services/geminiService';
 import { supabaseService, supabase } from './services/supabaseService';
 
-const MOCK_TEAM: User[] = [
-  { id: 'u1', name: 'BLINKY', role: 'Dev', color: 'bg-red-500', avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Blinky' },
-  { id: 'u2', name: 'PINKY', role: 'Design', color: 'bg-pink-400', avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Pinky' },
-  { id: 'u3', name: 'INKY', role: 'PM', color: 'bg-cyan-400', avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Inky' },
-  { id: 'u4', name: 'CLYDE', role: 'QA', color: 'bg-orange-400', avatar: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Clyde' },
-];
-
 const App: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('storyflow_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [teamMembers, setTeamMembers] = useState<User[]>([]);
+
+  // Check for existing session on load
+  useEffect(() => {
+    if (!supabase) {
+      setAuthLoading(false);
+      return;
+    }
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const metadata = session.user.user_metadata;
+        setCurrentUser({
+          id: session.user.id,
+          name: metadata?.display_name || session.user.email?.split('@')[0].toUpperCase() || 'PLAYER',
+          avatar: metadata?.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Default',
+          color: 'bg-yellow-400',
+          role: 'Team Member'
+        });
+      }
+      setAuthLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const metadata = session.user.user_metadata;
+        setCurrentUser({
+          id: session.user.id,
+          name: metadata?.display_name || session.user.email?.split('@')[0].toUpperCase() || 'PLAYER',
+          avatar: metadata?.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Default',
+          color: 'bg-yellow-400',
+          role: 'Team Member'
+        });
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+    }
+  };
 
   const [projectName, setProjectName] = useState('NEXUS-PROJECT-ALPHA');
   const [stories, setStories] = useState<UserStory[]>([]);
@@ -52,10 +92,10 @@ const App: React.FC = () => {
   }, [appMode, appTheme]);
 
   const allAvailableUsers = useMemo(() => {
-    if (!currentUser) return MOCK_TEAM;
-    const exists = MOCK_TEAM.find(u => u.id === currentUser.id);
-    return exists ? MOCK_TEAM : [...MOCK_TEAM, currentUser];
-  }, [currentUser]);
+    if (!currentUser) return teamMembers;
+    const exists = teamMembers.find(u => u.id === currentUser.id);
+    return exists ? teamMembers : [currentUser, ...teamMembers];
+  }, [currentUser, teamMembers]);
 
   const refreshData = useCallback(async () => {
     if (!supabase) {
@@ -148,10 +188,18 @@ const App: React.FC = () => {
     ghosts: stories.filter(s => s.status === StoryStatus.BLOCKED).length
   };
 
-  if (!currentUser) return <LoginScreen onLogin={u => {
-    localStorage.setItem('storyflow_user', JSON.stringify(u));
-    setCurrentUser(u);
-  }} isDarkTheme={isDark} />;
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className={`fixed inset-0 flex items-center justify-center ${isDark ? 'bg-black' : 'bg-[#f0f0ff]'}`}>
+        <div className={`arcade-font text-xl animate-pulse ${isDark ? 'text-yellow-400' : 'text-[#2121ff]'}`}>
+          LOADING...
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) return <LoginScreen onLogin={setCurrentUser} isDarkTheme={isDark} />;
 
   return (
     <div className={`min-h-screen transition-all duration-500 ${isDark ? 'bg-black text-white' : 'bg-[#f8f9ff] text-slate-900'} relative flex flex-col font-mono`}>
@@ -212,6 +260,14 @@ const App: React.FC = () => {
           </button>
           <div className={`flex items-center gap-3 border-l pl-4 ${isDark ? 'border-blue-900' : 'border-[#2121ff]/10'}`}>
              <img src={currentUser.avatar} className={`w-9 h-9 rounded border-2 ${isDark ? 'border-blue-600' : 'border-[#2121ff]'}`} alt="User Avatar" />
+             <span className={`arcade-font text-[8px] hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{currentUser.name}</span>
+             <button
+               onClick={handleLogout}
+               className={`arcade-font text-[8px] px-3 py-2 rounded transition-all ${isDark ? 'text-red-400 hover:bg-red-500/20' : 'text-red-500 hover:bg-red-50'}`}
+               title="Logout"
+             >
+               LOGOUT
+             </button>
           </div>
         </div>
       </header>
