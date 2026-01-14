@@ -260,15 +260,13 @@ const App: React.FC = () => {
           </button>
           <div className={`flex items-center gap-3 border-l pl-4 ${isDark ? 'border-blue-900' : 'border-[#2121ff]/10'}`}>
              <img src={currentUser.avatar} className={`w-9 h-9 rounded border-2 ${isDark ? 'border-blue-600' : 'border-[#2121ff]'}`} alt="User Avatar" />
-             <span className={`arcade-font text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{currentUser.name}</span>
-             <button
-               onClick={handleLogout}
-               className={`arcade-font text-[10px] px-4 py-2 rounded border transition-all ${isDark ? 'border-red-400 text-red-400 hover:bg-red-500/20' : 'border-red-500 text-red-500 hover:bg-red-50'}`}
-               title="Logout"
-             >
-               LOGOUT
-             </button>
           </div>
+          <button
+            onClick={handleLogout}
+            className="arcade-font text-[12px] px-6 py-3 bg-red-600 text-white rounded ml-4"
+          >
+            LOGOUT ({currentUser.name})
+          </button>
         </div>
       </header>
 
