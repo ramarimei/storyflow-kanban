@@ -1,5 +1,5 @@
 {
-  "name": "StoryFlow Kanban",
+  "name": "StoryFlow=Kanban",
   "description": "A dynamic Jira-style storyboard that uses Gemini to parse project progress from docx files and manage user stories for meetings.",
   "requestFramePermissions": []
 }
