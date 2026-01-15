@@ -1,9 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { UserStory } from '../types';
 
-// In Vite, environment variables defined in `define` are replaced at build time.
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+// Use Vite's import.meta.env for environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Only initialize if credentials exist to avoid crash
 export const supabase: SupabaseClient | null = (supabaseUrl && supabaseAnonKey) 
