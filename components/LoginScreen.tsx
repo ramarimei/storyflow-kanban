@@ -100,11 +100,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, isDarkTheme }) => {
         className={`max-w-md w-full p-10 maze-border text-center ${isDarkTheme ? 'bg-black' : 'bg-white'}`}
       >
         <h2 className={`arcade-font text-xl mb-2 animate-pulse ${isDarkTheme ? 'text-yellow-400' : 'text-[#2121ff]'}`}>
-          {isSignUp ? 'JOIN GAME' : 'PLAYER LOGIN'}
+          PLAYER LOGIN
         </h2>
-        <p className={`text-xs mb-8 ${isDarkTheme ? 'text-slate-500' : 'text-slate-400'}`}>
-          {isSignUp ? 'Create your account' : 'Sign in to continue'}
+        <p className={`text-xs mb-4 ${isDarkTheme ? 'text-slate-500' : 'text-slate-400'}`}>
+          Sign in to continue
         </p>
+        <div className={`text-xs mb-6 p-3 rounded border ${isDarkTheme ? 'bg-blue-900/20 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-600'}`}>
+          Invite only - contact for access
+        </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded text-red-400 text-sm">
@@ -174,16 +177,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, isDarkTheme }) => {
           </button>
         </form>
 
-        <button
-          onClick={() => {
-            setIsSignUp(!isSignUp);
-            setError('');
-            setMessage('');
-          }}
-          className={`mt-6 text-sm underline ${isDarkTheme ? 'text-slate-500 hover:text-yellow-400' : 'text-slate-400 hover:text-[#2121ff]'}`}
-        >
-          {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-        </button>
       </motion.div>
     </div>
   );
