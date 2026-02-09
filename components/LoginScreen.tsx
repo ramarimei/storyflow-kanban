@@ -177,6 +177,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, isDarkTheme }) => {
           </button>
         </form>
 
+        <button
+          type="button"
+          onClick={() => { setIsSignUp(!isSignUp); setError(''); setMessage(''); }}
+          className={`mt-4 text-xs underline transition-colors ${isDarkTheme ? 'text-slate-500 hover:text-yellow-400' : 'text-slate-400 hover:text-[#2121ff]'}`}
+        >
+          {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
+        </button>
+
       </motion.div>
     </div>
   );
