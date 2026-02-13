@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { UserStory, StoryStatus, StoryPriority, StoryType, User, AcceptanceCriterion } from '../types';
+import { getEpicColor, getUniqueEpics } from '../utils/epicUtils';
 
 interface EditStoryModalProps {
   story: UserStory;
   users: User[];
   currentUser: User;
   isDarkTheme: boolean;
+  allStories: UserStory[];
   onClose: () => void;
   onSave: (story: UserStory) => void;
 }
@@ -16,6 +18,7 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
   users,
   currentUser,
   isDarkTheme,
+  allStories,
   onClose,
   onSave,
 }) => {
@@ -28,6 +31,8 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>(
     story.acceptanceCriteria || []
   );
+  const [epic, setEpic] = useState(story.epic || '');
+  const [showEpicSuggestions, setShowEpicSuggestions] = useState(false);
   const [newCriterion, setNewCriterion] = useState('');
 
   const isPacman = typeof document !== 'undefined' && document.body.classList.contains('mode-pacman');
@@ -42,6 +47,7 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
       points,
       assigneeId: assigneeId || undefined,
       acceptanceCriteria,
+      epic: epic.trim() || null,
     });
   };
 
@@ -176,6 +182,48 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Epic */}
+          <div className="relative">
+            <label className={labelClass}>Epic / Feature Group</label>
+            <input
+              type="text"
+              value={epic}
+              onChange={(e) => { setEpic(e.target.value); setShowEpicSuggestions(true); }}
+              onFocus={() => setShowEpicSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowEpicSuggestions(false), 150)}
+              className={inputClass}
+              placeholder="e.g. Outreach & Adoption"
+            />
+            {showEpicSuggestions && (() => {
+              const existingEpics = getUniqueEpics(allStories).filter(
+                e => e.toLowerCase().includes(epic.toLowerCase()) && e !== epic
+              );
+              if (existingEpics.length === 0) return null;
+              return (
+                <div className={`absolute z-10 w-full mt-1 border-2 rounded max-h-40 overflow-y-auto ${
+                  isDarkTheme ? 'bg-black border-blue-900' : 'bg-white border-slate-300 shadow-lg'
+                }`}>
+                  {existingEpics.map(e => {
+                    const color = getEpicColor(e, isDarkTheme);
+                    return (
+                      <button
+                        key={e}
+                        type="button"
+                        onMouseDown={() => { setEpic(e); setShowEpicSuggestions(false); }}
+                        className={`w-full text-left px-3 py-2 flex items-center gap-2 text-sm transition-colors ${
+                          isDarkTheme ? 'hover:bg-blue-900/30 text-slate-300' : 'hover:bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${color.dot}`} />
+                        {e}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Acceptance Criteria */}

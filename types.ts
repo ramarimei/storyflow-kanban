@@ -64,6 +64,7 @@ export interface UserStory {
   remainingTasks?: string;
   comments?: Comment[];
   acceptanceCriteria?: AcceptanceCriterion[];
+  epic?: string | null;
 }
 
 export interface WorkspaceState {

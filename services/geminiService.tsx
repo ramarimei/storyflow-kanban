@@ -28,6 +28,7 @@ export const parseStoriesFromText = async (text: string): Promise<GeminiStoryRes
     contents: `You are an expert Technical Product Manager. Analyze the following document and extract implementation-ready User Stories or Action Items.
 
     IMPORTANT: If you see bullet points or numbered lists that describe requirements for a story, extract them as 'acceptanceCriteria'.
+    IMPORTANT: If stories belong to a logical group, feature area, or epic (e.g. "Outreach & Adoption", "Infrastructure", "Onboarding"), extract that as the 'epic' field. If no clear grouping exists, set epic to null.
 
     Text: ${text}
 
@@ -68,7 +69,8 @@ export const parseStoriesFromText = async (text: string): Promise<GeminiStoryRes
                     },
                     required: ['text', 'completed']
                   }
-                }
+                },
+                epic: { type: Type.STRING, nullable: true }
               },
               required: ['title', 'description', 'status', 'priority', 'type']
             }
@@ -131,7 +133,7 @@ export const generateMeetingScript = async (stories: UserStory[], projectName: s
     return "AI features are not configured.";
   }
 
-  const context = stories.map(s => `[${s.status}] ${s.title} (${s.priority} Priority)`).join('\n');
+  const context = stories.map(s => `[${s.status}] ${s.title} (${s.priority} Priority)${s.epic ? ` [Epic: ${s.epic}]` : ''}`).join('\n');
 
   const response = await client.models.generateContent({
     model: 'gemini-2.0-flash',

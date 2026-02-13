@@ -2,9 +2,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { UserStory, StoryStatus, StoryPriority, StoryType, User } from '../types';
+import { getEpicColor } from '../utils/epicUtils';
 
 interface StoryCardProps {
   story: UserStory;
+  storyNumber?: number;
   onMove: (id: string, newStatus: StoryStatus) => void;
   onDelete: (id: string) => void;
   onEdit?: (story: UserStory) => void;
@@ -14,9 +16,10 @@ interface StoryCardProps {
   allUsers?: User[];
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ 
-  story, 
-  onDelete, 
+const StoryCard: React.FC<StoryCardProps> = ({
+  story,
+  storyNumber,
+  onDelete,
   onEdit,
   assignee
 }) => {
@@ -71,9 +74,25 @@ const StoryCard: React.FC<StoryCardProps> = ({
     >
       <div className="flex justify-between items-start mb-4">
         <div className="flex flex-col">
-          <span className={`arcade-font text-[8px] uppercase tracking-tighter ${priorityColors[story.priority]}`}>
-            {story.priority} PRIORITY
-          </span>
+          <div className="flex items-center gap-2">
+            {storyNumber && (
+              <span className={`arcade-font text-[8px] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                #{storyNumber}
+              </span>
+            )}
+            <span className={`arcade-font text-[8px] uppercase tracking-tighter ${priorityColors[story.priority]}`}>
+              {story.priority} PRIORITY
+            </span>
+          </div>
+          {story.epic && (() => {
+            const epicColor = getEpicColor(story.epic, isDark);
+            return (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold mt-1 w-fit ${epicColor.bg} ${epicColor.text}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${epicColor.dot}`} />
+                {story.epic}
+              </span>
+            );
+          })()}
           <h3 className={`font-bold text-sm mt-1 ${isBug ? 'text-red-500' : (isDark ? 'text-white' : 'text-[#000033]')}`}>
             {story.title}
           </h3>

@@ -365,7 +365,7 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {editingStory && <EditStoryModal story={editingStory} users={allAvailableUsers} currentUser={currentUser} isDarkTheme={isDark} onClose={() => setEditingStory(null)} onSave={async s => {
+        {editingStory && <EditStoryModal story={editingStory} users={allAvailableUsers} currentUser={currentUser} isDarkTheme={isDark} allStories={stories} onClose={() => setEditingStory(null)} onSave={async s => {
           const isNew = !stories.find(old => old.id === s.id);
           if (isNew) { setStories(prev => [...prev, s]); } else { setStories(prev => prev.map(old => old.id === s.id ? s : old)); }
           await supabaseService.upsertStory(s, projectName);
