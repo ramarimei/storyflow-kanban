@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { UserStory, StoryStatus, StoryPriority, StoryType, User, AcceptanceCriterion } from '../types';
 import { getEpicColor, getUniqueEpics } from '../utils/epicUtils';
@@ -36,6 +36,17 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
   const [newCriterion, setNewCriterion] = useState('');
 
   const isPacman = typeof document !== 'undefined' && document.body.classList.contains('mode-pacman');
+  const descRef = useRef<HTMLTextAreaElement>(null);
+
+  const autoResize = useCallback(() => {
+    const el = descRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+  }, []);
+
+  useEffect(() => { autoResize(); }, [description, autoResize]);
 
   const handleSave = () => {
     onSave({
@@ -88,7 +99,7 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={`maze-border w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 ${
+        className={`maze-border w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 ${
           isDarkTheme ? 'bg-black' : 'bg-white'
         }`}
       >
@@ -121,9 +132,11 @@ const EditStoryModal: React.FC<EditStoryModalProps> = ({
           <div>
             <label className={labelClass}>Description</label>
             <textarea
+              ref={descRef}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`${inputClass} min-h-[100px] resize-none`}
+              onInput={autoResize}
+              className={`${inputClass} min-h-[100px]`}
               placeholder="Describe the story..."
             />
           </div>
